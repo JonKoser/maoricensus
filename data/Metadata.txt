@@ -1,0 +1,23 @@
+TA2014 = Unique ID for district
+
+TA2014_NAM = Name of Territorial Authority District
+
+PctNoTel = Percent of the district without access to telecommunications
+
+PctSpkMao = Percent of the district that speaks Maori
+
+MaSpkOnMao = Percent of the Maori population in the district who chose Maori as thier only official language
+
+PctMaRelig = Percent of the population in the district which practices a Maori-Christian Religion
+
+MedIncMao = Median income for the Maori population for that district
+
+MedIncome = Median income for the district
+
+MedIncDif = The difference between the median income of a district's overal popualtion and the district's Maori population
+
+MaMedInDif = The difference between the national Maori median income and the district's Maori median income
+
+PctMaori = Percentage of the population which identifies as Maori
+
+Total_Pop = Total population of the district
