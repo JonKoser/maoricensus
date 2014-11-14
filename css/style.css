@@ -1,5 +1,5 @@
 html {
-    background-color: rgb(0, 100, 100);
+    background-color: rgb(149, 159, 166);
 }
 
 body {
@@ -24,6 +24,7 @@ h3 {
 
 .map {
     border: medium solid black;
+    border-radius: 10px;
 }
 
 .districts {
@@ -39,20 +40,22 @@ h3 {
 
 .gratLines {
     fill: none;
-    stroke: rgb(200, 200, 200);
-    stroke-width: 0.25px;
+    stroke: rgb(149, 159, 166);
+    stroke-width: 0.4px;
 }
 
 .dropdown {
     margin-left: 650px;
     margin-top: 20px;
     margin-bottom: 10px;
+    position: absolute;
+    z-index: 100;
 }
 
 .dropdown select {
     font-size: 1em;
     border: 1px solid black;
-    width: 150px;
+    width: 275px;
 }
 
 .infolabel {
@@ -64,6 +67,7 @@ h3 {
     background-color: black;
     border: solid thin #fff;
     padding: 5px;
+    border-radius: 5%;
 }
 
 .infolabel h1 {
@@ -90,26 +94,34 @@ h3 {
 }
 
 .chart {
-    background-color: rgb(200, 200, 200);
-    border: medium solid black;
+    background-color: transparent;
     margin-left: 650px;
-    margin-top: 260px;
 }
 
 .chartTitle {
     font-size: 18pt;
     font-weight: bold;
+    fill: transparent;
 }
+
+.legend {
+    background-color: transparent;
+    margin-top: 550px;
+    margin-left: 160px;
+    border-radius: 10px;
+    
+}
+
+.legendLabels {
+    font-size: 10pt
+}
+
 
 #title {
     font-family: serif;
     margin-top: -10px;
-    margin-bottom: -1px;
-    color: rgb(230,100,100);
-    text-shadow:
-        -0.5px -0.5px 0 white,
-        0.5px -0.5px 0 white,
-        -0.5px 0.5px 0 white,
-        0.5px 0.5px 0 white;
+    margin-bottom: 10px;
+    color: white;
+    text-shadow: 2px 2px rgb(125,55,54);
     
 }

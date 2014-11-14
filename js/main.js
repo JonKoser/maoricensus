@@ -5,6 +5,8 @@ var expressed = keyArray[0] //initial attribute
 var recolorPoly;
 var width = 620, height = 620;
 var chartWidth = 600, chartHeight = 300;
+var quantiles;
+var xArray = [145, 205, 265, 325, 385]; //x coordinates for legend boxes
 
 //begin script when window loads
 window.onload = initialize();
@@ -113,10 +115,12 @@ function setMap () {
                         return choropleth(d, recolorPoly);
                 });
         
-        createDropdown(csvData); //create the dropdown menu
+
         setChart(csvData, recolorPoly); //create the bar chart
+        createDropdown(csvData); //create the dropdown menu
+        createLegend(); //create the legend
         
-    };
+    };//end callback
     
     
 }// end setMap
@@ -216,7 +220,7 @@ function updateChart(bars, csvData) {
     //find max value for expressed attribute
     var max = findMax();
     //find out how much space the title is taking up at the top - add another 10 pixels
-    var titleY = (Number(d3.select(".chartTitle").attr("y"))+10);
+    var titleY = (Number(d3.select(".chartTitle").attr("y")-10));
     
     bars.attr("height", function(d, i) { //sets height of the bars relative to total height usable under title
             return (((chartHeight-titleY)/max)*Number(d[expressed])); 
@@ -248,6 +252,8 @@ function updateChart(bars, csvData) {
         return tempMax;
     };//end findMax
     
+    updateLegend(d3.selectAll(".legendLabels"));
+    
 }; //end updateChart
 
 
@@ -262,19 +268,21 @@ function colorScale (csvData) {
                     "rgb(8, 104, 172)"
             ]);
     //build array of all currently expressed values for input domain
-    /*var domainArray = [];
+    var domainArray = [];
     for (var i in csvData) {
         domainArray.push(Number(csvData[i][expressed]));
     };
     
     //pass array of expressed values as domain
-    color.domain(domainArray);*/
+    color.domain(domainArray);
     
     //min and max values for domain for linear scaling
-    color.domain([
+    /*color.domain([
         d3.min(csvData, function(d) {return Number(d[expressed]); }),
         d3.max(csvData, function(d) {return Number(d[expressed]); })
-    ]);
+    ]);*/
+    
+    quantiles = color.quantiles();
     
     return color; //return the now set up color scale
     
@@ -326,17 +334,18 @@ function dehighlight(data) {
 }; //end dehighlight
 
 function moveLabel() {
-    if (d3.event.clientX < window.innerWidth - 245){
+
+    if (d3.event.clientX < window.innerWidth - 230){
         var x = d3.event.clientX+10; //horizontal label coordinate based mouse position stored in d3.event
     }
     else {
-        var x = d3.event.clientX-210; //horizontal label coordinate based mouse position stored in d3.event
+        var x = d3.event.clientX-220; //horizontal label coordinate based mouse position stored in d3.event
     };
-    if (d3.event.clientY-75 < window.innerHeight - 100) {
-        var y = d3.event.clientY-75; //vertical label coordinate
+    if (d3.event.clientY < window.innerHeight - 160) {
+        var y = d3.event.clientY-95; //vertical label coordinate
     }
     else {
-        var y = d3.event.clientY - 175; //vertical label coordinate
+        var y = d3.event.clientY-255; //vertical label coordinate
     };
     d3.select(".infolabel") //select the label div for moving
         .style("margin-left", x+"px") //reposition label horizontal
@@ -360,7 +369,7 @@ function label(attrName) {
                 labelText = "% Who Practice Maori Religion";
                 break;
             case "MedIncMao":
-                labelText = "$ Maori Median Income ($)";
+                labelText = "Maori Median Income ($)";
                 break;
             case "MedIncome":
                 labelText = "Median Income ($)";
@@ -374,3 +383,78 @@ function label(attrName) {
     };
     return labelText;
 }; //end label
+
+//create the legend
+function createLegend() {
+    //array of 5 colors being used
+    var colorArray = ["rgb(240,249,232)",
+                    "rgb(186,228,188)",
+                    "rgb(123, 204, 196)",
+                    "rgb(67,162,202)",
+                    "rgb(8, 104, 172)"]
+    
+    //selects the body and adds a box for the legend
+    var legend = d3.select("body")
+        .append("svg")
+        .attr("width", 520)
+        .attr("height", 70)
+        .attr("class", "legend");
+    
+    //creates the legend boxes using the x coordinates and colors them
+    //using the color array
+    var legendBars = legend.selectAll(".legendBars")
+        .data(xArray)
+        .enter()
+        .append("rect")
+        .attr("class", "legendBars")
+        .attr("y", 30)
+        .attr("width", 60)
+        .attr("height", 30)
+        .attr("x", function (d, i) {
+            return xArray[i];
+        })
+        .style("fill", function(d, i){
+            return colorArray[i];
+        });
+    
+    //creates labels for each legend box
+    var legendLabels = legend.selectAll(".legendLabels")
+        .data(xArray)
+        .enter()
+        .append("text")
+        .attr("class", "legendLabels")
+        .attr("y", 25);
+    
+    updateLegend(legendLabels);
+};//end create legend
+
+//updates the leged each time variable is changed
+function updateLegend(legendLabels) {
+    
+    
+    legendLabels.attr("x", function (d,i) {
+                        return xArray[i] + 45
+                })
+                .text(function(d, i) {
+                    if (i < 4) {
+                        if (expressed == "Total_Pop") {
+                            console.log(expressed);
+                            return Math.round(quantiles[i]);
+                        }
+                        if (expressed == "MedIncMao" || expressed == "MedIncome") {
+                            return "$" + Math.round(quantiles[i]);
+                        }
+                        else {
+                            return (Math.round(quantiles[i] * 100) /100) + "%";
+                        }
+                    };
+                })
+                .style("fill", "white");
+    
+}; //end update legend
+
+
+
+function createPyramids() {
+    
+}; //end create pyramids
