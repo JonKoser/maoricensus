@@ -2,11 +2,19 @@
 var keyArray = ["PctNoTel","PctSpkMao","MaSpkOnMa","PctMaRelig",
                 "MedIncMao","MedIncome","PctMaori","Total_Pop"]
 var expressed = keyArray[0] //initial attribute
-var recolorPoly;
-var width = 620, height = 620;
-var chartWidth = 600, chartHeight = 300;
-var quantiles;
+var recolorPoly; //function to recolor the given polygons
+var width = 620, height = 620; //map width and heights
+var chartWidth = 640, chartHeight = 300; //bar chart width and heights
+var quantiles; //quantile break points for choropleth
 var xArray = [145, 205, 265, 325, 385]; //x coordinates for legend boxes
+var popWidth = 640
+var popHeight = 300
+var popBarWidth = Math.floor(popWidth/18) - 1;
+var popRange = []; //array of total pop values for one district
+var distVals = []; //array of all the objects for a single district
+var currentDist; //district selected
+var popAges; //create a variable to contain the population csv data
+
 
 //begin script when window loads
 window.onload = initialize();
@@ -48,7 +56,8 @@ function setMap () {
     var gratBackground = map.append("path")
             .datum(graticule.outline) //bind graticule background
             .attr("class", "gratBackground") //assign class for styling
-            .attr("d", path); //project graticule
+            .attr("d", path)
+            .on("click", changeDist); //project graticule
     
     //create craticule lines
     var gratLines = map.selectAll(".gratLines") //select graticule elements
@@ -57,18 +66,21 @@ function setMap () {
             .append("path") //append each element to the svg as a path element
             .attr("class", "gratLines") //assigns class for styling
             .attr("d", path); //project graticule lines
+
     
     
     //use queue.js to parallelise asynchronous data loading
     queue()
         .defer(d3.csv, "data/NewZealand.csv") //load attributes from csv
         .defer(d3.json, "data/NZ_Districts.topojson") //load geometry from topojson
+        .defer(d3.csv, "data/population_ages.csv") //load population data
         .await(callback); //trigger callback function once data is loaded
    
     //retrieve and process NZ json file and data
-    function callback(error, csvData, NZ_Districts) {
+    function callback(error, csvData, NZ_Districts, popCSV) {
         recolorPoly = colorScale(csvData); //a color scale is generated from the entire set of data
         
+        popAges = popCSV;
         //variables for csv to json data transfer
         var jsonDists = NZ_Districts.objects.New_Zealand_Districts.geometries;
         
@@ -110,6 +122,7 @@ function setMap () {
                 .on("mouseover", highlight)
                 .on("mouseout", dehighlight)
                 .on("mousemove", moveLabel)
+                .on("click", changeDist)
                 .append("desc") //append the current color
                     .text(function(d) {
                         return choropleth(d, recolorPoly);
@@ -119,9 +132,9 @@ function setMap () {
         setChart(csvData, recolorPoly); //create the bar chart
         createDropdown(csvData); //create the dropdown menu
         createLegend(); //create the legend
+        setPopPyramid(popAges); //creates the population pyramid
         
     };//end callback
-    
     
 }// end setMap
 
@@ -207,7 +220,8 @@ function setChart(csvData, recolorPoly) {
             .attr("width", chartWidth / csvData.length - 1)
             .on("mouseover", highlight)
             .on("mouseout", dehighlight)
-            .on("mousemove", moveLabel);
+            .on("mousemove", moveLabel)
+            .on("click", changeDist);
     
     updateChart(bars, csvData);
     
@@ -438,7 +452,6 @@ function updateLegend(legendLabels) {
                 .text(function(d, i) {
                     if (i < 4) {
                         if (expressed == "Total_Pop") {
-                            console.log(expressed);
                             return Math.round(quantiles[i]);
                         }
                         if (expressed == "MedIncMao" || expressed == "MedIncome") {
@@ -455,6 +468,221 @@ function updateLegend(legendLabels) {
 
 
 
-function createPyramids() {
+function setPopPyramid(popAges) {
     
-}; //end create pyramids
+    var yRange = d3.scale.linear()
+        .range([popHeight, 0]);
+    
+    var yAxis = d3.svg.axis()
+        .scale(yRange)
+        .orient("right")
+        .tickSize(-popWidth)
+        .tickFormat(d3.format(",.0f"));
+    
+    // An SVG element with a bott-right origin.
+    var pyramid = d3.select("body").append("svg")
+        .attr("width", popWidth)
+        .attr("height", popHeight)
+        .attr("class", "pyramid")
+    
+    //A label for the current year
+    var pyramidTitle = pyramid.append("text")
+        .attr("class", "pyramidTitle")
+        .attr("dy", ".71em")
+        .text("Total Maori Popluation");
+    
+    var pyramidSubtext = pyramid.append("text")
+        .attr("class", "pyramidSubtext")
+        .attr("dy", ".71em")
+        .attr("y", 40)
+        .text("Age Distribution");
+    
+        
+    //convert strings to numbers
+    popAges.forEach(function(d) {
+        d.male = +d.male;
+        d.female = +d.female;
+    });
+    
+    //compute the extent of the data set in age and years
+    var year1 = 2013;
+    
+    popRange = [];
+    distVals = [];
+    var found = false; // need to search for the correct district
+    var i = 0;
+    //searches for our staring values - no district selected so all (TA0)
+    while (!found) {
+        if (popAges[i].TA2014 == "TA0") {
+            for (var j = 0; j<18; j++) {
+                var district = popAges[i+j];
+                popRange.push(district.male);
+                popRange.push(district.female);
+                distVals.push(district);
+            };
+            found = true;
+        };
+        i++;
+    };
+    
+    popRange.reverse();
+    distVals.reverse();
+    
+    //set bars for selected district
+    var malePopBars = pyramid.selectAll(".malePopBars")
+            .data(distVals)
+            .enter()
+            .append("rect")
+            .attr("class", function(d) {
+                return "malePopVal " + d.age;
+            })
+            .attr("width", popBarWidth)
+            .on("mouseover", showPop)
+            .on("mousemove", moveLabel)
+            .on("mouseout", hidePop);
+    
+    var femalePopBars = pyramid.selectAll(".femalePopBars")
+        .data(distVals)
+        .enter()
+        .append("rect")
+        .attr("class", function(d) {
+            return "femalePopVal " + d.age;
+        })
+        .attr("width", popBarWidth)
+        .on("mouseover", showPop)
+        .on("mousemove", moveLabel)
+        .on("mouseout", hidePop);
+    
+    var age = pyramid.selectAll(".age")
+        .data(distVals)
+        .enter()
+        .append("text")
+        .attr("class", "age")
+        .attr("x", function(d, i) { return (.15*popBarWidth)+(i*(popWidth/18))})
+        .attr("y", popHeight-1)
+        .text(function(d) {return d.age})
+        .attr("fill", "white");
+    
+    
+    updatePyramid(popAges);
+    
+}; //end setPopPyramid
+    
+function updatePyramid(popAges) {
+   
+    var pyramid = d3.select(".pyramid");
+    
+    var maxPop = d3.max(popRange);
+    
+    var malePopBars = d3.selectAll(".malePopVal")
+        .data(distVals);
+    
+    var femalePopBars = d3.selectAll(".femalePopVal")
+        .data(distVals);
+        
+    
+    malePopBars.attr("height", function(d, i) { //sets height of the bars relative to total height usable under title
+            return ((popHeight/maxPop)*Number(d.male)); 
+        })
+        .attr("y", function(d, i) { //uses the height to put the bars at the bottom
+            return popHeight - ((popHeight/maxPop)*Number(d.male));
+        })
+        .attr("x", function(d,i) {
+            return i * (popWidth / 18);
+        })
+        .style("fill", function(d) {
+            return "rgb(8, 104, 172)";
+        })
+        .style("opacity", 0.5);
+     
+    femalePopBars = d3.selectAll(".femalePopVal")
+        .attr("height", function(d, i) { //sets height of the bars relative to total height usable under title
+            return ((popHeight/maxPop)*Number(d.female)); 
+        })
+        .attr("y", function(d, i) { //uses the height to put the bars at the bottom
+            return popHeight - ((popHeight/maxPop)*Number(d.female));
+        })
+        .attr("x", function(d,i) {
+            return i * (popWidth / 18);
+        })
+        .style("fill", function(d) {
+            return "rgb(230, 100, 100)";
+        })
+        .style("opacity", 0.5);
+
+    
+    
+}; //end update pyramids
+
+function changeDist(data) {
+    
+    var props = data.properties ? data.properties : data;
+    
+    var distID;
+    var titleText;
+    
+    if (props.TA2014 == undefined) {
+        distID = "TA0";
+        titleText = "Total Maori Population"
+    }
+    else {
+        distID = props.TA2014
+        titleText = props.TA2014_NAM
+    };
+    
+    var pyramidTitle = d3.select(".pyramidTitle")
+        .text(titleText);
+
+    popRange = [];
+    distVals = [];
+    var found = false; // need to search for the correct district
+    var i = 0;
+    //searches for our staring values - no district selected so all (TA0)
+    while (!found) {
+        if (popAges[i].TA2014 == distID) {
+            for (var j = 0; j<18; j++) {
+                var district = popAges[i+j];
+                popRange.push(district.male);
+                popRange.push(district.female);
+                distVals.push(district);
+            };
+            found = true;
+        };
+        i++;
+    };
+    
+    popRange.reverse();
+    distVals.reverse();
+    
+    updatePyramid(popAges);
+}// end change District
+
+function showPop(data) {
+    var popMale = data.male;
+    var popFemale = data.female;
+    
+    var labelName = "<p class='labelname'>"+data.TA2014_NAM; //html string for name to go in child div
+    var labelContents;
+    if (data.TA2014_NAM == "New Zealand") {
+        labelContents = labelName+" has</p><br><h2>"+popMale+" male & <h2>"+popFemale+" female Maori</h2> " +data.age+ " years old"; //label content
+    }
+    else {
+        labelContents = labelName+" has</p><br><br><h2>"+popMale+" male & <h2>"+popFemale+" female Maori</h2> " +data.age+ " years old"; //label content
+    }
+    //create info label div
+    var infolabel = d3.select("body").append("div")
+            .attr("class", "infolabel") //for styling label
+            .attr("id", data.TA2014+"label") //for label div
+            .style("height", function () {
+                    if (data.TA2014_NAM == "New Zealand") {
+                        return 120;
+                    }})
+            .html(labelContents);
+    
+
+    
+}
+
+function hidePop(data) {
+    d3.select("#"+data.TA2014+"label").remove();
+}

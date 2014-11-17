@@ -1,12 +1,12 @@
 html {
-    background-color: rgb(149, 159, 166);
+    background-color: rgb(179, 189, 196);
 }
 
 body {
     height: 100%;
     margin: 20px;
     font-family: "Proxim Nova Rg", Arial, Helvetica, sans-serif;
-    color: white;
+    color: #666;
     /* text unselectable*/
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -15,12 +15,54 @@ body {
 
 svg {
     position: absolute;
+    font: 10px sans-serif;
 }
 
 h3 {
     display: inline;
     margin-right: 10px;
 }
+
+.y.axis path {
+    display: none;
+}
+
+.y.axis line {
+    stroke: #fff;
+    stroke-opacity: .2;
+    shape-rendering: crispEdges;
+}
+
+.y.axis .zero line {
+    stroke: #000;
+    stroke-opacity: 1;
+}
+
+.pyramidTitle {
+    font: 300 36px Helvetica Neue;
+    fill: #666;
+}
+
+.pyramidSubtext {
+    font: 300 28px Helvetica Neue;
+    fill: #666;
+}
+    
+
+.birthyear,
+.age {
+    text-anchor: middle:
+}
+
+.birthyear {
+    fill: #fff;
+}
+
+.pyramid {
+    margin-left: 650px;
+    margin-top: 320px;
+}
+
 
 .map {
     border: medium solid black;
@@ -61,7 +103,7 @@ h3 {
 .infolabel {
     position: absolute;
     width: 170px;
-    height: 95px;
+    height: 100px;
     resize: both;
     color: #fff;
     background-color: black;
@@ -76,6 +118,14 @@ h3 {
     display: inline-block;
     line-height: 1em;
     font-size: 18pt;
+}
+
+.infolabel h2 {
+    margin: 0px;
+    padding: 0px;
+    display: inline-block;
+    line-height: 1em;
+    font-size: 14pt;
 }
 
 .infolabel b {
@@ -118,10 +168,11 @@ h3 {
 
 
 #title {
-    font-family: serif;
+    font: 300 72px Helvetica Neue;
+    text-align: center;
+    color: #666;
     margin-top: -10px;
     margin-bottom: 10px;
-    color: white;
-    text-shadow: 2px 2px rgb(125,55,54);
+
     
 }
