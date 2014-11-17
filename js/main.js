@@ -356,10 +356,10 @@ function moveLabel() {
         var x = d3.event.clientX-220; //horizontal label coordinate based mouse position stored in d3.event
     };
     if (d3.event.clientY < window.innerHeight - 160) {
-        var y = d3.event.clientY-95; //vertical label coordinate
+        var y = d3.event.clientY-330; //vertical label coordinate
     }
     else {
-        var y = d3.event.clientY-255; //vertical label coordinate
+        var y = d3.event.clientY-330; //vertical label coordinate
     };
     d3.select(".infolabel") //select the label div for moving
         .style("margin-left", x+"px") //reposition label horizontal
@@ -568,6 +568,8 @@ function setPopPyramid(popAges) {
     
 }; //end setPopPyramid
     
+
+//updates the pop pyramid
 function updatePyramid(popAges) {
    
     var pyramid = d3.select(".pyramid");
@@ -614,6 +616,7 @@ function updatePyramid(popAges) {
     
 }; //end update pyramids
 
+//function to change which district is selected for pop pyramid
 function changeDist(data) {
     
     var props = data.properties ? data.properties : data;
@@ -657,6 +660,7 @@ function changeDist(data) {
     updatePyramid(popAges);
 }// end change District
 
+//creates the population pyramid info label
 function showPop(data) {
     var popMale = data.male;
     var popFemale = data.female;
@@ -678,11 +682,10 @@ function showPop(data) {
                         return 120;
                     }})
             .html(labelContents);
-    
+       
+}//end showPop
 
-    
-}
-
+//gets rid of pop pyramid info label
 function hidePop(data) {
     d3.select("#"+data.TA2014+"label").remove();
-}
+}//end hidePop
