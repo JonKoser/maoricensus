@@ -275,11 +275,11 @@ function colorScale (csvData) {
     //create quantile classes with color scale
     var color = d3.scale.quantile() //sets up a quantile scale generator
             .range ([
-                    "rgb(240,249,232)",
-                    "rgb(186,228,188)",
-                    "rgb(123, 204, 196)",
-                    "rgb(67,162,202)",
-                    "rgb(8, 104, 172)"
+                    "rgb(255,255,212)",
+                    "rgb(254,217,142)",
+                    "rgb(254,153,41)",
+                    "rgb(217,95,14)",
+                    "rgb(153,52,4)"
             ]);
     //build array of all currently expressed values for input domain
     var domainArray = [];
@@ -320,7 +320,7 @@ function highlight(data) {
     var props = data.properties ? data.properties : data;
     
     d3.selectAll("."+props.TA2014) //select the current province
-            .style("fill", "rgb(230, 100, 100)"); //set the enumeration unti fill to black
+            .style("fill", "rgb(100, 230, 100)"); //set the enumeration unti fill to black
     var labelName = "<p class='labelname'>"+props.TA2014_NAM; //html string for name to go in child div
     var labelContents = labelName+" has</p><br><br><h1>"+props[expressed]+"</h1><br><b>"+label(expressed)+"</b>"; //label content
 
@@ -401,11 +401,11 @@ function label(attrName) {
 //create the legend
 function createLegend() {
     //array of 5 colors being used
-    var colorArray = ["rgb(240,249,232)",
-                    "rgb(186,228,188)",
-                    "rgb(123, 204, 196)",
-                    "rgb(67,162,202)",
-                    "rgb(8, 104, 172)"]
+    var colorArray = ["rgb(255,255,212)",
+                    "rgb(254,217,142)",
+                    "rgb(254,153,41)",
+                    "rgb(217,95,14)",
+                    "rgb(153,52,4)"]
     
     //selects the body and adds a box for the legend
     var legend = d3.select("body")
