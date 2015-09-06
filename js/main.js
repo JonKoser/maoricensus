@@ -359,7 +359,7 @@ function moveLabel() {
         var y = d3.event.pageY - 200; //vertical label coordinate
     }
     else {
-        var y = d3.event.pageY - 330; //vertical label coordinate
+        var y = d3.event.pageY - 350; //vertical label coordinate
     };
     d3.select(".infolabel") //select the label div for moving
         .style("margin-left", x+"px") //reposition label horizontal
