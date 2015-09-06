@@ -349,17 +349,17 @@ function dehighlight(data) {
 
 function moveLabel() {
 
-    if (d3.event.clientX < window.innerWidth - 230){
-        var x = d3.event.clientX+10; //horizontal label coordinate based mouse position stored in d3.event
+    if (d3.event.pageX < window.innerWidth - 230){
+        var x = d3.event.pageX + 10; //horizontal label coordinate based mouse position relative to the rendered page stored in d3.event
     }
     else {
-        var x = d3.event.clientX-220; //horizontal label coordinate based mouse position stored in d3.event
+        var x = d3.event.pageX - 220; //horizontal label coordinate based mouse position relative to the rendered page stored in d3.event
     };
-    if (d3.event.clientY < window.innerHeight - 160) {
-        var y = d3.event.clientY-330; //vertical label coordinate
+    if (d3.event.clientY < window.innerHeight - 300) {
+        var y = d3.event.pageY - 200; //vertical label coordinate
     }
     else {
-        var y = d3.event.clientY-330; //vertical label coordinate
+        var y = d3.event.pageY - 330; //vertical label coordinate
     };
     d3.select(".infolabel") //select the label div for moving
         .style("margin-left", x+"px") //reposition label horizontal
@@ -467,7 +467,7 @@ function updateLegend(legendLabels) {
 }; //end update legend
 
 
-
+//creates the population pyramid
 function setPopPyramid(popAges) {
     
     var yRange = d3.scale.linear()
@@ -485,7 +485,7 @@ function setPopPyramid(popAges) {
         .attr("height", popHeight)
         .attr("class", "pyramid")
     
-    //A label for the current year
+    //A title for the graph
     var pyramidTitle = pyramid.append("text")
         .attr("class", "pyramidTitle")
         .attr("dy", ".71em")
@@ -624,10 +624,12 @@ function changeDist(data) {
     var distID;
     var titleText;
     
+    //upon clicking the black
     if (props.TA2014 == undefined) {
         distID = "TA0";
         titleText = "Total Maori Population"
     }
+    //clicking a district
     else {
         distID = props.TA2014
         titleText = props.TA2014_NAM
@@ -660,7 +662,7 @@ function changeDist(data) {
     updatePyramid(popAges);
 }// end change District
 
-//creates the population pyramid info label
+//creates the popup info label
 function showPop(data) {
     var popMale = data.male;
     var popFemale = data.female;
